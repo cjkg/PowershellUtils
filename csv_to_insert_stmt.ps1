@@ -1,3 +1,6 @@
+#A way to turn CSVs from clients into update scripts faster, 
+#while avoiding a few gotchas involving quotation marks and NULL values
+
 $csv_path = './test.csv' #Put your path to the CSV here
 $my_table = Import-Csv -Path $csv_path
 $headers = $my_table | Get-Member -MemberType 'NoteProperty' | Select-Object -ExpandProperty 'Name'
