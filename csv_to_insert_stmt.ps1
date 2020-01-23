@@ -1,4 +1,4 @@
-#A way to turn CSVs from clients into update scripts faster, 
+#A way to turn CSVs into update scripts faster, without excel,
 #while avoiding a few gotchas involving quotation marks and NULL values
 
 #Get CSV name, making sure that the file exists
@@ -73,16 +73,9 @@ for ($i = 1; $i -lt $my_table.Count; $i++) {
     $print_string = '('
     for ($j = 0; $j -lt $header_count; $j++) {
         if ($add_quotes[$j] -eq 1) {
-            #Add starting quote mark if requested
-            $print_string = $print_string + "'"
-        }
-
-        #Get string information
-        $print_string = $print_string + $row.($headers[$j])
-        
-        #Add ending quote mark if requested
-        if ($add_quotes[$j] -eq 1) {
-            $print_string = $print_string + "'"
+            $print_string = $print_string + "'" + $row.($headers[$j]) + "'"
+        } else { 
+            $print_string = $print_string + $row.($headers[$j])
         }
 
         if ($j + 1 -ne $header_count) {
@@ -90,8 +83,12 @@ for ($i = 1; $i -lt $my_table.Count; $i++) {
             $print_string = $print_string + ', '
         }
     }
-    #Add closing parentheses and comma. Not a good way to prevent final comma though
-    $print_string = $print_string + '),'
+    #Add closing parentheses and comma (if applicable)
+    if (($i+1 -ne $my_table.Count) -and ($i%5000 -ne 0)) {
+        $print_string = $print_string + '),'
+    } else {
+        $print_string = $print_string + ')'
+    }
     
     #Replace any 'NULL's with NULLs
     $print_string = $print_string.Replace("''NULL''", 'NULL').Replace("'NULL'", 'NULL')
