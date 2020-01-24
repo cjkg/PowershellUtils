@@ -26,22 +26,22 @@ do {
 #Get sql file name, and make sure that it has the correct extension and isn't blank or empty
 do {
     $out_name = Read-Host -Prompt 'Enter what name you want the output file to be named (include extension)'
-    if ($null -eq $out_name) {
+    if ($null -eq $out_name) {  #need this case to avoid null error thrown
         $out_name_length = 0
-    } elseif ($out_name -notlike '*.sql') {
+    } elseif ($out_name -notlike '*.sql') { #just to make sure it's executable sql
         $out_name_length = 0
         Write-Host "The name given doesn't have a '.sql' extension. Try again."
     } else {
-        $out_name_length = ($out_name.Trim()).Length
+        $out_name_length = ($out_name.Trim()).Length #Otherwise get the length to break the loop
     }
 } while ($out_name_length -eq 0)
 
-$in_path = "./$csv_name" #Put your path to the CSV here
+$in_path = "./$csv_name"
 $out_path = "./$out_name"
 
-$my_table = Import-Csv -Path $in_path
+$my_table = Import-Csv -Path $in_path #import the csv
 
-$headers = (Get-Content $in_path)[0] -Split ',' #could use Get-Member, but that puts them out of order
+$headers = (Get-Content $in_path)[0] -Split ',' #Get csv headers. Could use Get-Member, but that puts them out of order
 $header_count = $headers.Count
 
 #This grabs the first row of the CSV to get the header names.
@@ -69,17 +69,18 @@ for ($i = 1; $i -lt $my_table.Count; $i++) {
     }
 
     $row = $my_table[$i] #Just a helper assignment for readability
-    
-    $print_string = '('
+
+    $print_string = '(' #start of the insert values list, opening parenthesis
+
     for ($j = 0; $j -lt $header_count; $j++) {
-        if ($add_quotes[$j] -eq 1) {
+        if ($add_quotes[$j] -eq 1) { #if the options row = 1, add quotes, otherwise just add the value
             $print_string = $print_string + "'" + $row.($headers[$j]) + "'"
         } else { 
             $print_string = $print_string + $row.($headers[$j])
         }
 
         if ($j + 1 -ne $header_count) {
-            #Add closing comma if not last item in row
+            #Add closing comma if not last item in values statement
             $print_string = $print_string + ', '
         }
     }
@@ -89,25 +90,25 @@ for ($i = 1; $i -lt $my_table.Count; $i++) {
     } else {
         $print_string = $print_string + ')'
     }
-    
-    #Replace any 'NULL's with NULLs
+
+    #Replace any 'NULL'/''NULL''s with NULLs to avoid them being inserted as strings
     $print_string = $print_string.Replace("''NULL''", 'NULL').Replace("'NULL'", 'NULL')
     $final_statement += $print_string
 }
 
-if (!(Test-Path $out_path)) {
-    Write-Host "File Created at $out_path"
-    New-Item -path $out_path
-    Set-Content -Path $out_path -Value $final_statement
+if (!(Test-Path $out_path)) { #If the outpath doesn't exist, create a file. Otherwise confirm first.
+    Write-Host "File Created at $out_path" #Alert user
+    New-Item -path $out_path #Create file
+    Set-Content -Path $out_path -Value $final_statement #Add the INSERT INTO statements into the file
 } else {
     do {
-        $overwrite = Read-Host -Prompt "File already exists at $out_path. Overwrite? (Y/N)"
+        $overwrite = Read-Host -Prompt "File already exists at $out_path. Overwrite? (Y/N)" #Confirm overwrite
     } while ($overwrite -notin @('N', 'Y'))
 
     if ($overwrite -eq 'Y') {
-        Write-Host "File Overwritten at $out_path"
-        Set-Content -Path $out_path -Value $final_statement
+        Write-Host "File Overwritten at $out_path" #Alert User
+        Set-Content -Path $out_path -Value $final_statement #Change the contents of the existing file
     } else {
-        Write-Host "Aborting..."
+        Write-Host "Aborting..." #Alert User
     }
 }
