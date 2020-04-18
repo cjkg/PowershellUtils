@@ -85,7 +85,7 @@ for ($i = 1; $i -lt $my_table.Count; $i++) {
         }
     }
     #Add closing parentheses and comma (if applicable)
-    if (($i+1 -ne $my_table.Count) -and ($i%5000 -ne 0)) {
+    if (($i+1 -ne $my_table.Count) -and ($i%1000 -ne 0)) {
         $print_string = $print_string + '),'
     } else {
         $print_string = $print_string + ')'
