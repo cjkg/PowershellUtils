@@ -1,4 +1,4 @@
-#A way to turn CSVs into update scripts faster, without excel,
+#A way to turn CSVs into MS SQL Server insert scripts faster, without excel,
 #while avoiding a few gotchas involving quotation marks and NULL values
 
 #Get CSV name, making sure that the file exists
@@ -62,9 +62,9 @@ for ($i = 0; $i -lt $header_count; $i++) {
 
 $final_statement = @()
 for ($i = 1; $i -lt $my_table.Count; $i++) {
-    #On every 5000th line (including line 0), put the Insert Into statement generated
-    #above into the query. SQL Server can only handle 5000 lines at a time.
-    if (($i-1)%5000 -eq 0) {
+    #On every 1000th line (including line 0), put the Insert Into statement generated
+    #above into the query. SQL Server can only handle 1000 lines at a time.
+    if (($i-1)%1000 -eq 0) {
         $final_statement += $insert_into
     }
 
